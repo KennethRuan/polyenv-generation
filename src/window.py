@@ -93,6 +93,11 @@ sliders = []
 def_button = Button(20, VIEWPORT_H+20, text="FIT")
 buttons.append(def_button)
 
+# Button 2
+calc_button = Button(140, VIEWPORT_H+20, text="CALC")
+buttons.append(calc_button)
+
+
 # Slider 1
 left_slider = Slider(100, 0, VIEWPORT_W-20, 20, 450, VIEWPORT_W-40, 15)
 sliders.append(left_slider)
@@ -108,6 +113,7 @@ def pixel(surface, color, pos):
 def drawUI():
     pygame.draw.rect(screen, midnight_blue, (0,VIEWPORT_H,VIEWPORT_R,SCREEN_H))
     def_button.draw()
+    calc_button.draw()
     left_slider.draw()
     right_slider.draw()
     
@@ -139,6 +145,7 @@ while run:
                     update_screen = True
             if event.key == pygame.K_r:
                 if lobf_exists:
+                    print(left_slider.s_rect.centerx, right_slider.s_rect.centerx)
                     print(arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"]))
 
         if mouse_down:
@@ -163,6 +170,9 @@ while run:
                     lobf = polyfit(x_vals, y_vals, 0, VIEWPORT_W)
                     lobf_exists = True
                     update_screen = True
+            if button_clicked == 1:
+                if lobf_exists:
+                    print(arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"]))
             button_clicked = -1
             slider_clicked = -1
 
@@ -188,13 +198,13 @@ while run:
             # Red Pole controlled by slider 0
             red_pole = pygame.Rect(0,0,2,30)
             red_pole.centerx = sliders[0].s_rect.centerx
-            red_pole.bottom = lobf["points"][red_pole.centerx][1]
+            red_pole.bottom = max(-30, min(VIEWPORT_H+30, lobf["points"][red_pole.centerx][1]))
             pygame.draw.rect(screen, (255,0,0), (red_pole))
 
             # Blue Pole controlled by slider 1
             blue_pole = pygame.Rect(0,0,2,30)
             blue_pole.centerx = sliders[1].s_rect.centerx
-            blue_pole.bottom = lobf["points"][blue_pole.centerx][1]
+            blue_pole.bottom = max(-30,min(VIEWPORT_H+30, lobf["points"][blue_pole.centerx][1]))
             pygame.draw.rect(screen, (0,0,255), (blue_pole))
 
         for pos in point_list:

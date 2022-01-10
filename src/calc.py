@@ -19,14 +19,14 @@ def polyfit(x, y, l, r):
     old_fit = -1
     cur_fit = 0
     n=1
-    while old_fit < cur_fit and n <= min(len(x)-1,20):
+    while old_fit < cur_fit and n <= min(len(x)-1, 20):
         old_fit = cur_fit
 
         data = polynomialfit(x, y, n, [l,r])
         coeffs = data.convert().coef
 
         # Find r^2 to determine fit
-        p = np.poly1d(coeffs)
+        p = np.poly1d(coeffs[::-1])
         yhat = p(x)                        
         ybar = np.sum(y)/len(y)        
         ssreg = np.sum((yhat-ybar)**2)   
@@ -68,7 +68,7 @@ def arclength(l, r, coeffs):
     # Riemann Sum to approximate integration on the arc length function
     N = 10000
     dx = (r-l)/N
-    x_midpoint = np.linspace(dx/2, r - dx/2, N)
+    x_midpoint = np.linspace(l+dx/2, r - dx/2, N)
     riemann_sum = np.sum(f(x_midpoint) * dx)
 
     return riemann_sum 
