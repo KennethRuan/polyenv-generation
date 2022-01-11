@@ -17,6 +17,7 @@ VIEWPORT_R = SCREEN_W//2 + VIEWPORT_W//2
 
 # Initialize simulation variables
 pygame.init()
+bg = pygame.image.load("./img/background.png")
 run = True
 screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 LMB = 1
@@ -116,8 +117,9 @@ def drawUI():
     calc_button.draw()
     left_slider.draw()
     right_slider.draw()
-    
+
 screen.fill(white)
+screen.blit(bg, (0, 0))
 drawUI()
 while run:
 
@@ -188,12 +190,13 @@ while run:
 
         # Plot points and curve
         screen.fill(white)
-        
+        screen.blit(bg, (0, 0))
+
         if lobf_exists:
             func_points = lobf["points"]
             for i in range(0, len(lobf["points"])-1):
-                pygame.draw.rect(screen, (50,120,50), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]))
-                pygame.draw.line(screen, (255, 0, 0), func_points[i], func_points[i+1])
+                pygame.draw.rect(screen, (50,120+(40 if (i//10)%2==0 else 0),50), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
+                # pygame.draw.line(screen, (255, 0, 0), func_points[i], func_points[i+1])
 
             # Red Pole controlled by slider 0
             red_pole = pygame.Rect(0,0,2,30)
