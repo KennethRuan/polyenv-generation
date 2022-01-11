@@ -1,5 +1,8 @@
 import pygame
 from calc import  * 
+import math
+from random import randrange
+
 # Define colours
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -18,6 +21,8 @@ VIEWPORT_R = SCREEN_W//2 + VIEWPORT_W//2
 # Initialize simulation variables
 pygame.init()
 bg = pygame.image.load("./img/background.png")
+gnd = pygame.image.load("./img/ground2.png")
+grass = pygame.image.load("./img/grass.png")
 run = True
 screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 LMB = 1
@@ -194,9 +199,19 @@ while run:
 
         if lobf_exists:
             func_points = lobf["points"]
+            dirt_offset = 30
             for i in range(0, len(lobf["points"])-1):
-                pygame.draw.rect(screen, (50,120+(40 if (i//10)%2==0 else 0),50), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
+                # grass_col = (50,120+(40 if (i//10)%2==0 else 0),50)
+                # grass_col = (50,120,50)
+                # pygame.draw.rect(screen, grass_col, (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
+                # if (i % 5 == 0):
+                    # dirt_offset = (1 if ((i//10)%2==0) else -1)*i%20 + 5
+                    # dirt_offset = (abs(math.sin(i/19*math.pi))*10 + abs(math.sin(i/37*math.pi+1000))*10 - abs(math.sin(i/7*math.pi+1000))*2 + 30)//5*5
+                # pygame.draw.rect(screen, (145,81,45), (func_points[i][0],func_points[i+1][1]+dirt_offset, func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5+dirt_offset))
                 # pygame.draw.line(screen, (255, 0, 0), func_points[i], func_points[i+1])
+                # screen.blit(gnd, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
+                screen.blit(grass, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+10))
+
 
             # Red Pole controlled by slider 0
             red_pole = pygame.Rect(0,0,2,30)
