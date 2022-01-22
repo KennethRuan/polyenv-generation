@@ -2,6 +2,7 @@ import pygame
 from calc import  * 
 import math
 from random import randrange
+from decimal import Decimal
 
 # Define colours
 black = (0, 0, 0)
@@ -22,8 +23,11 @@ VIEWPORT_R = SCREEN_W//2 + VIEWPORT_W//2
 pygame.init()
 bg = pygame.image.load("./img/background.png")
 gnd = pygame.image.load("./img/ground2.png")
+cross_sect = pygame.image.load('./img/cross_section3.png')
 grass = pygame.image.load("./img/grass.png")
+font = pygame.font.SysFont('Helvetica', 25)
 run = True
+overlay = False
 screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 LMB = 1
 mouse_down = False
@@ -31,6 +35,7 @@ update_screen = False
 lobf_exists = False
 button_clicked = -1
 slider_clicked = -1
+arclen = 0
 point_list = []
 lobf = {}
 
@@ -92,6 +97,35 @@ class Slider():
         self.s_rect.centerx = self.b_x+(self.per*self.b_w)
         # print("val", self.val, "per", self.per, "x", self.s_rect.centerx)
 
+
+def blit_alpha(target, source, location, opacity):
+        x = location[0]
+        y = location[1]
+        temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+        temp.blit(target, (-x, -y))
+        temp.blit(source, (0, 0))
+        temp.set_alpha(opacity)        
+        target.blit(temp, location)
+
+def calcText(dist=0):
+    dist = '%.2f' % dist
+    dist = '%.7E' % Decimal(dist) if len(dist) >= 8 else dist
+
+    hlv_s = pygame.font.SysFont('Helvetica', 16)
+    units = hlv_s.render("UNITS", True, white)
+    units_rect = units.get_rect(bottomright=(940,420))
+    screen.blit(units, units_rect)
+
+    hlv_b = pygame.font.SysFont('Helvetica', 16)
+    dist = hlv_b.render(dist, True, white)
+    dist_rect = dist.get_rect(bottomright=(units_rect.bottomleft[0]-8, units_rect.bottomleft[1]))
+    screen.blit(dist, dist_rect)
+
+    hlv_t = pygame.font.SysFont('Helvetica', 12)
+    title = hlv_t.render("DIST", True, white)
+    title_rect = title.get_rect(bottomright=(units_rect.topright[0], units_rect.topright[1]-8))
+    screen.blit(title, title_rect)
+
 # Initialize UI components
 buttons = []
 sliders = []
@@ -103,6 +137,9 @@ buttons.append(def_button)
 calc_button = Button(140, VIEWPORT_H+20, text="CALC")
 buttons.append(calc_button)
 
+# Button 3
+overlay_button = Button(260, VIEWPORT_H+20, w=140, text="OVERLAY")
+buttons.append(overlay_button)
 
 # Slider 1
 left_slider = Slider(100, 0, VIEWPORT_W-20, 20, 450, VIEWPORT_W-40, 15)
@@ -116,16 +153,18 @@ def pixel(surface, color, pos):
     # pygame.draw.line(surface, color, pos, pos)
     pygame.draw.circle(surface, color, pos, 2)
 
-def drawUI():
+def drawUI(arclen):
     pygame.draw.rect(screen, midnight_blue, (0,VIEWPORT_H,VIEWPORT_R,SCREEN_H))
+    calcText(arclen)
     def_button.draw()
     calc_button.draw()
+    overlay_button.draw()
     left_slider.draw()
     right_slider.draw()
 
 screen.fill(white)
 screen.blit(bg, (0, 0))
-drawUI()
+drawUI(arclen)
 while run:
 
     # Processing inputs
@@ -149,10 +188,14 @@ while run:
                     lobf = polyfit(x_vals, y_vals, 0, VIEWPORT_W)
                     lobf_exists = True
                     # print(lobf["points"])
-                    update_screen = True
+                else:
+                    lobf_exists = False
+                update_screen = True
             if event.key == pygame.K_r:
                 if lobf_exists:
-                    print(left_slider.s_rect.centerx, right_slider.s_rect.centerx)
+                    # print(left_slider.s_rect.centerx, right_slider.s_rect.centerx)
+                    arclen = arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"])
+                    update_screen = True
                     print(arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"]))
 
         if mouse_down:
@@ -176,10 +219,17 @@ while run:
                     x_vals, y_vals = zip(*point_list)
                     lobf = polyfit(x_vals, y_vals, 0, VIEWPORT_W)
                     lobf_exists = True
-                    update_screen = True
+                else:
+                    lobf_exists = False
+                update_screen = True
             if button_clicked == 1:
                 if lobf_exists:
+                    arclen = arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"])
+                    update_screen = True
                     print(arclength(left_slider.s_rect.centerx, right_slider.s_rect.centerx, lobf["polynomial"]))
+            if button_clicked == 2:
+                overlay = not overlay
+                update_screen = True
             button_clicked = -1
             slider_clicked = -1
 
@@ -191,12 +241,18 @@ while run:
             
     # Processing visual updates
     if update_screen:
+        print("updated")
         update_screen = False
 
-        # Plot points and curve
         screen.fill(white)
         screen.blit(bg, (0, 0))
 
+        # Draw overlay
+        if overlay:
+            # print("overlaying")
+            blit_alpha(screen, cross_sect, (0, 0), 128)
+
+        # Plot points and curve
         if lobf_exists:
             func_points = lobf["points"]
             dirt_offset = 30
@@ -228,6 +284,6 @@ while run:
         for pos in point_list:
             pixel(screen, black, pos)
 
-        drawUI()
+        drawUI(arclen)
         
     pygame.display.update()
