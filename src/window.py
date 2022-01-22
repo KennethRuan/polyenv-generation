@@ -25,6 +25,7 @@ bg = pygame.image.load("./img/background.png")
 gnd = pygame.image.load("./img/ground2.png")
 cross_sect = pygame.image.load('./img/cross_section3.png')
 grass = pygame.image.load("./img/grass.png")
+sand = pygame.image.load("./img/sand2.png")
 font = pygame.font.SysFont('Helvetica', 25)
 run = True
 overlay = False
@@ -35,6 +36,8 @@ update_screen = False
 lobf_exists = False
 button_clicked = -1
 slider_clicked = -1
+terrains = ["GRASS", "SAND", "BRIDGE"]
+terrain_ind = 0
 arclen = 0
 point_list = []
 lobf = {}
@@ -121,9 +124,20 @@ def calcText(dist=0):
     dist_rect = dist.get_rect(bottomright=(units_rect.bottomleft[0]-8, units_rect.bottomleft[1]))
     screen.blit(dist, dist_rect)
 
-    hlv_t = pygame.font.SysFont('Helvetica', 12)
+    hlv_t = pygame.font.SysFont('Helvetica', 10)
     title = hlv_t.render("DIST", True, white)
     title_rect = title.get_rect(bottomright=(units_rect.topright[0], units_rect.topright[1]-8))
+    screen.blit(title, title_rect)
+
+def terrainText(terrain):
+    hlv_b = pygame.font.SysFont('Helvetica', 16)
+    terr = hlv_b.render(terrain, True, white)
+    terr_rect = terr.get_rect(bottomright=(720,420))
+    screen.blit(terr, terr_rect)
+
+    hlv_t = pygame.font.SysFont('Helvetica', 10)
+    title = hlv_t.render("TERRAIN", True, white)
+    title_rect = title.get_rect(bottomright=(terr_rect.topright[0], terr_rect.topright[1]-8))
     screen.blit(title, title_rect)
 
 # Initialize UI components
@@ -141,6 +155,10 @@ buttons.append(calc_button)
 overlay_button = Button(260, VIEWPORT_H+20, w=140, text="OVERLAY")
 buttons.append(overlay_button)
 
+# Button 4
+terrain_button = Button(420, VIEWPORT_H+20, w=140, text="TERRAIN")
+buttons.append(terrain_button)
+
 # Slider 1
 left_slider = Slider(100, 0, VIEWPORT_W-20, 20, 450, VIEWPORT_W-40, 15)
 sliders.append(left_slider)
@@ -153,18 +171,20 @@ def pixel(surface, color, pos):
     # pygame.draw.line(surface, color, pos, pos)
     pygame.draw.circle(surface, color, pos, 2)
 
-def drawUI(arclen):
+def drawUI(arclen, terrain):
     pygame.draw.rect(screen, midnight_blue, (0,VIEWPORT_H,VIEWPORT_R,SCREEN_H))
     calcText(arclen)
+    terrainText(terrain)
     def_button.draw()
     calc_button.draw()
+    terrain_button.draw()
     overlay_button.draw()
     left_slider.draw()
     right_slider.draw()
 
 screen.fill(white)
 screen.blit(bg, (0, 0))
-drawUI(arclen)
+drawUI(arclen, terrains[terrain_ind])
 while run:
 
     # Processing inputs
@@ -230,6 +250,10 @@ while run:
             if button_clicked == 2:
                 overlay = not overlay
                 update_screen = True
+            if button_clicked == 3:
+                terrain_ind = (terrain_ind+1)%len(terrains)
+                update_screen = True
+
             button_clicked = -1
             slider_clicked = -1
 
@@ -241,7 +265,6 @@ while run:
             
     # Processing visual updates
     if update_screen:
-        print("updated")
         update_screen = False
 
         screen.fill(white)
@@ -249,26 +272,25 @@ while run:
 
         # Draw overlay
         if overlay:
-            # print("overlaying")
             blit_alpha(screen, cross_sect, (0, 0), 128)
 
         # Plot points and curve
         if lobf_exists:
             func_points = lobf["points"]
             dirt_offset = 30
-            for i in range(0, len(lobf["points"])-1):
-                # grass_col = (50,120+(40 if (i//10)%2==0 else 0),50)
-                # grass_col = (50,120,50)
-                # pygame.draw.rect(screen, grass_col, (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
-                # if (i % 5 == 0):
-                    # dirt_offset = (1 if ((i//10)%2==0) else -1)*i%20 + 5
-                    # dirt_offset = (abs(math.sin(i/19*math.pi))*10 + abs(math.sin(i/37*math.pi+1000))*10 - abs(math.sin(i/7*math.pi+1000))*2 + 30)//5*5
-                # pygame.draw.rect(screen, (145,81,45), (func_points[i][0],func_points[i+1][1]+dirt_offset, func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5+dirt_offset))
-                # pygame.draw.line(screen, (255, 0, 0), func_points[i], func_points[i+1])
-                # screen.blit(gnd, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+5))
-                screen.blit(grass, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+10))
-
-
+            if terrain_ind != 2:
+                for i in range(0, len(lobf["points"])-1):
+                    if terrain_ind == 0:
+                        screen.blit(grass, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+10))
+                    if terrain_ind == 1:
+                        screen.blit(sand, (func_points[i][0],func_points[i+1][1]), (func_points[i][0],func_points[i+1][1], func_points[i+1][0]-func_points[i][0], VIEWPORT_H-func_points[i+1][1]+10))
+            else:
+                for i in range(0, len(lobf["points"])-1):
+                    if i%25 == 0:
+                        pygame.draw.line(screen, (255, 0, 0), func_points[i], (func_points[i][0], VIEWPORT_H), width=3)
+                for i in range(0, len(lobf["points"])-1):
+                    pygame.draw.line(screen, (255, 0, 0), func_points[i], func_points[i+1], width=7)
+                    
             # Red Pole controlled by slider 0
             red_pole = pygame.Rect(0,0,2,30)
             red_pole.centerx = sliders[0].s_rect.centerx
@@ -284,6 +306,6 @@ while run:
         for pos in point_list:
             pixel(screen, black, pos)
 
-        drawUI(arclen)
+        drawUI(arclen, terrains[terrain_ind])
         
     pygame.display.update()
