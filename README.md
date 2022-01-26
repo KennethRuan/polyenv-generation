@@ -1,7 +1,7 @@
 # polyenv-generation
 A terrain generator based on fitting a polynomial function to desired points. This project is a small demonstration on the applications of finding arc length using calculus.
 
-
+![alt text](https://github.com/KennethRuan/polyenv-generation/blob/main/img/ALC%20Demo.png?raw=true)
 
 # Installation
 
