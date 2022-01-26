@@ -21,6 +21,7 @@ VIEWPORT_R = SCREEN_W//2 + VIEWPORT_W//2
 
 # Initialize simulation variables
 pygame.init()
+pygame.display.set_caption("Arc Length Calculator")
 bg = pygame.image.load("./img/background.png")
 gnd = pygame.image.load("./img/ground2.png")
 cross_sect = pygame.image.load('./img/cross_section3.png')
